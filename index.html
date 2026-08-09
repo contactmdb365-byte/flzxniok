@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Flash Generator - Secure Crypto Flash Service</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #080808;
+            color: #ffffff;
+            overflow-x: hidden;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        @keyframes progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        @keyframes bounce-once {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-spin { animation: spin 1s linear infinite; }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .animate-progress { animation: progress 2s ease-in-out infinite; }
+        .animate-bounce-once { animation: bounce-once 0.5s ease-in-out; }
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out; }
+
+        .bg-mesh {
+            background: 
+                radial-gradient(circle at 50% -20%, rgba(13, 162, 147, 0.15) 0%, transparent 70%),
+                radial-gradient(circle at 100% 100%, rgba(13, 162, 147, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 0% 50%, rgba(13, 162, 147, 0.03) 0%, transparent 40%);
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-hover:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(13, 162, 147, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary {
+            cursor: pointer;
+            border-radius: 0.75rem;
+            padding: 0.875rem 2rem;
+            font-weight: 700;
+            letter-spacing: 0.025em;
+            color: white;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #0da293 0%, #0a7a6f 100%);
+            border: none;
+            box-shadow: 0 4px 15px rgba(13, 162, 147, 0.3);
+            width: 100%;
+            text-align: center;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+        .btn-primary:hover:not(:disabled)::before {
+            left: 100%;
+        }
+        .btn-primary:hover:not(:disabled) {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(13, 162, 147, 0.5);
+        }
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px rgba(13, 162, 147, 0.3);
+        }
+        .btn-primary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+        }
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            transform: translateX(-2px);
+        }
+
+        .btn-support {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            background: rgba(13, 162, 147, 0.1);
+            border: 1px solid rgba(13, 162, 147, 0.25);
+            border-radius: 0.75rem;
+            color: #0da293;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            white-space: nowrap;
+            backdrop-filter: blur(10px);
+        }
+        .btn-support:hover {
+            background: rgba(13, 162, 147, 0.2);
+            border-color: rgba(13, 162, 147, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(13, 162, 147, 0.2);
+        }
+
+        .badge-ok { background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .badge-warning { background: rgba(245, 158, 11, 0.12); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .badge-processing { background: rgba(234, 179, 8, 0.12); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.2); }
+        .badge-deployed { background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
+        .badge-success { background: rgba(34, 197, 94, 0.12); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
+        .badge-error { background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+        input, textarea, select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: white;
+            outline: none;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 0.9375rem;
+            font-family: inherit;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: rgba(13, 162, 147, 0.5);
+            background: rgba(13, 162, 147, 0.08);
+            box-shadow: 0 0 0 3px rgba(13, 162, 147, 0.1);
+        }
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Modal overlay */
+        #aprilFoolModal {
+            display: none !important;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            padding: 1rem;
+        }
+        
+        /* Coin card styles */
+        .coin-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            width: 100%;
+        }
+        .coin-card:hover {
+            background: rgba(13, 162, 147, 0.1);
+            border-color: rgba(13, 162, 147, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        .coin-card.selected {
+            background: rgba(13, 162, 147, 0.15);
+            border-color: #0da293;
+            box-shadow: 0 0 30px rgba(13, 162, 147, 0.2);
+        }
+        
+        /* Network card styles */
+        .network-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            width: 100%;
+        }
+        .network-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(13, 162, 147, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .network-card.selected {
+            background: rgba(13, 162, 147, 0.08);
+            border-color: #0da293;
+            box-shadow: 0 0 20px rgba(13, 162, 147, 0.15);
+        }
+        
+        /* QR Code styling */
+        .qr-container {
+            background: white;
+            padding: 1rem;
+            border-radius: 1rem;
+            display: inline-block;
+            max-width: 100%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .qr-code {
+            width: 180px;
+            height: 180px;
+            max-width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 0.5rem;
+        }
+        .qr-code canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        /* Navigation styles */
+        .navbar {
+            background: rgba(8, 8, 8, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            flex-shrink: 0;
+        }
+
+        .brand-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+
+        .brand-text {
+            font-weight: 800;
+            font-size: 1.25rem;
+            letter-spacing: -0.025em;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+            justify-content: flex-end;
+            min-width: 0;
+        }
+
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            max-width: 320px;
+            min-width: 150px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.625rem 2.75rem 0.625rem 1rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            color: white;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+        .search-input:focus {
+            border-color: rgba(13, 162, 147, 0.4);
+            background: rgba(13, 162, 147, 0.05);
+            box-shadow: 0 0 0 3px rgba(13, 162, 147, 0.1);
+        }
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(13, 162, 147, 0.2);
+            border: none;
+            color: #0da293;
+            cursor: pointer;
+            font-size: 1rem;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .search-btn:hover {
+            background: rgba(13, 162, 147, 0.3);
+        }
+
+        /* Utility classes */
+        .hidden { display: none !important; }
+        .w-full { width: 100%; }
+        .text-center { text-align: center; }
+        .text-left { text-align: left; }
+        .text-right { text-align: right; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-6 { margin-top: 1.5rem; }
+        .mt-8 { margin-top: 2rem; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .gap-1 { gap: 0.25rem; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .gap-4 { gap: 1rem; }
+        .gap-6 { gap: 1.5rem; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .flex-wrap { flex-wrap: wrap; }
+        .items-center { align-items: center; }
+        .items-start { align-items: flex-start; }
+        .justify-center { justify-content: center; }
+        .justify-between { justify-content: space-between; }
+        .grid { display: grid; }
+        .grid-cols-1 { grid-template-columns: 1fr; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .rounded-2xl { border-radius: 1rem; }
+        .rounded-3xl { border-radius: 1.5rem; }
+        .rounded-full { border-radius: 9999px; }
+        .font-normal { font-weight: 400; }
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .font-black { font-weight: 900; }
+        .text-xs { font-size: 0.75rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-base { font-size: 1rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        .text-2xl { font-size: 1.5rem; }
+        .text-3xl { font-size: 1.875rem; }
+        .text-4xl { font-size: 2.25rem; }
+        .text-5xl { font-size: 3rem; }
+        .text-primary { color: #0da293; }
+        .text-white { color: #ffffff; }
+        .text-white\/30 { color: rgba(255, 255, 255, 0.3); }
+        .text-white\/40 { color: rgba(255, 255, 255, 0.4); }
+        .text-white\/50 { color: rgba(255, 255, 255, 0.5); }
+        .text-white\/60 { color: rgba(255, 255, 255, 0.6); }
+        .text-white\/70 { color: rgba(255, 255, 255, 0.7); }
+        .text-white\/80 { color: rgba(255, 255, 255, 0.8); }
+        .text-green-400 { color: #4ade80; }
+        .text-yellow-400 { color: #facc15; }
+        .text-red-400 { color: #f87171; }
+        .text-blue-400 { color: #60a5fa; }
+        .bg-white\/5 { background: rgba(255, 255, 255, 0.05); }
+        .bg-white\/10 { background: rgba(255, 255, 255, 0.1); }
+        .bg-primary\/5 { background: rgba(13, 162, 147, 0.05); }
+        .bg-primary\/10 { background: rgba(13, 162, 147, 0.1); }
+        .bg-primary\/20 { background: rgba(13, 162, 147, 0.2); }
+        .border { border: 1px solid; }
+        .border-t { border-top: 1px solid; }
+        .border-white\/5 { border-color: rgba(255, 255, 255, 0.05); }
+        .border-white\/10 { border-color: rgba(255, 255, 255, 0.1); }
+        .border-primary\/10 { border-color: rgba(13, 162, 147, 0.1); }
+        .border-primary\/20 { border-color: rgba(13, 162, 147, 0.2); }
+        .border-primary\/30 { border-color: rgba(13, 162, 147, 0.3); }
+        .p-2 { padding: 0.5rem; }
+        .p-3 { padding: 0.75rem; }
+        .p-4 { padding: 1rem; }
+        .p-5 { padding: 1.25rem; }
+        .p-6 { padding: 1.5rem; }
+        .p-8 { padding: 2rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+        .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+        .py-12 { padding-top: 3rem; padding-bottom: 3rem; }
+        .py-16 { padding-top: 4rem; padding-bottom: 4rem; }
+        .relative { position: relative; }
+        .absolute { position: absolute; }
+        .sticky { position: sticky; }
+        .top-0 { top: 0; }
+        .inline-block { display: inline-block; }
+        .inline-flex { display: inline-flex; }
+        .block { display: block; }
+        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .break-all { word-break: break-all; }
+        .overflow-hidden { overflow: hidden; }
+        .cursor-pointer { cursor: pointer; }
+        .uppercase { text-transform: uppercase; }
+        .tracking-tight { letter-spacing: -0.025em; }
+        .tracking-tighter { letter-spacing: -0.05em; }
+        .tracking-wide { letter-spacing: 0.025em; }
+        .tracking-wider { letter-spacing: 0.05em; }
+        .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .shadow-xl { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
+        .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .shadow-primary { box-shadow: 0 0 20px rgba(13, 162, 147, 0.2); }
+        .blur-2xl { filter: blur(40px); }
+        .blur-3xl { filter: blur(64px); }
+        .transition { transition: all 0.3s ease; }
+        .opacity-30 { opacity: 0.3; }
+        .opacity-50 { opacity: 0.5; }
+        .pointer-events-none { pointer-events: none; }
+        .select-none { user-select: none; }
+        .flex-shrink-0 { flex-shrink: 0; }
+        .min-w-0 { min-width: 0; }
+        
+        /* Container */
+        .container {
+            width: 100%;
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 1.25rem;
+            padding-right: 1.25rem;
+        }
+
+        /* Section title */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        .section-title-line {
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        /* Feature card */
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 1.25rem;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(13, 162, 147, 0.2);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+        .feature-icon {
+            width: 3.5rem;
+            height: 3.5rem;
+            background: rgba(13, 162, 147, 0.15);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+            font-size: 1.5rem;
+            border: 1px solid rgba(13, 162, 147, 0.2);
+        }
+
+        /* Promo banner */
+        .promo-banner {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: linear-gradient(135deg, rgba(13, 162, 147, 0.15), rgba(13, 162, 147, 0.05));
+            border: 1px solid rgba(13, 162, 147, 0.2);
+            border-radius: 1rem;
+            padding: 1rem 1.25rem;
+        }
+        .promo-indicator {
+            width: 3px;
+            height: 2.5rem;
+            background: linear-gradient(to bottom, #0da293, #0a7a6f);
+            border-radius: 1rem;
+            flex-shrink: 0;
+        }
+
+        /* Amount input */
+        .amount-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 1.875rem;
+            font-weight: 800;
+            color: #0da293;
+            width: auto;
+            max-width: 140px;
+            padding: 0;
+            font-family: inherit;
+        }
+
+        /* Responsive grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+        }
+        .coin-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 480px) {
+            .coin-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 640px) {
+            .container {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .amount-input {
+                font-size: 2.25rem;
+                max-width: 160px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .feature-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .brand-text {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .coin-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .navbar-inner {
+                gap: 0.75rem;
+            }
+            .nav-actions {
+                width: 100%;
+                order: 3;
+            }
+            .search-wrapper {
+                max-width: 100%;
+            }
+            .btn-support {
+                font-size: 0.8125rem;
+                padding: 0.5rem 1rem;
+            }
+            .qr-code {
+                width: 150px;
+                height: 150px;
+            }
+            .amount-input {
+                font-size: 1.5rem;
+                max-width: 110px;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+    <div id="app"></div>
+
+    <!-- April Fool's Modal -->
+    <div id="aprilFoolModal">
+        <div class="relative w-full max-w-md bg-[#0a0a0a] border border-primary/30 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden mx-4 animate-fadeIn">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-3xl pointer-events-none"></div>
+            <div class="absolute -top-10 -left-10 w-32 h-32 bg-red-500/10 rounded-full blur-2xl"></div>
+            <div class="relative z-10 text-center space-y-6">
+                <div class="text-6xl sm:text-8xl animate-bounce-once">🎭</div>
+                <h3 class="text-2xl sm:text-3xl font-black italic text-primary uppercase tracking-tighter">April Fool!</h3>
+                <p class="text-white/80 text-base sm:text-lg leading-relaxed">Hey <span id="aprilFoolUsername" class="text-primary font-bold">bro</span>! 🎉</p>
+                <div class="bg-white/5 rounded-2xl p-4 border border-white/10">
+                    <p class="text-white/60 text-sm">Just kidding! This is an April Fool's prank.</p>
+                    <p class="text-white/40 text-xs mt-2">Your flash is safe and will be processed normally.</p>
+                </div>
+                <button onclick="window.closeAprilFoolModal()" class="btn-primary py-3 text-base font-black uppercase tracking-wider">
+                    Got it! 😂
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" style="position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); padding: 0.75rem 1.5rem; border-radius: 0.75rem; color: white; font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3); z-index: 50; display: none; max-width: 90vw; white-space: nowrap; backdrop-filter: blur(10px);"></div>
+
+    <script>
+        // ============================================
+        // PROFESSIONAL FLASH GENERATOR
+        // Complete realistic crypto flash service interface
+        // ============================================
+        
+        (function() {
+            // Coin data
+            const COINS = [
+                { id: 1, symbol: 'USDT', name: 'Tether USD', color: '#26a17b', icon: '💰' },
+                { id: 2, symbol: 'BTC', name: 'Bitcoin', color: '#f7931a', icon: '₿' },
+                { id: 3, symbol: 'ETH', name: 'Ethereum', color: '#627eea', icon: 'Ξ' },
+                { id: 4, symbol: 'BNB', name: 'Binance Coin', color: '#f3ba2f', icon: 'B' },
+                { id: 5, symbol: 'SOL', name: 'Solana', color: '#14f195', icon: 'S' }
+            ];
+            
+            // Wallet addresses for each network
+            const WALLET_ADDRESSES = {
+                'Bitcoin': 'bc1qc998u32ll78fdgka20lppcpsgwal5pccfpmcmp',
+                'ETH': '0x53b79eCBacC00e14ec6761dE870e045342756b5c',
+                'ERC20': '0x53b79eCBacC00e14ec6761dE870e045342756b5c',
+                'SOL': '2VN1hVHdYoUFGf2wrMypgrSZofzEgPJX7cJQBe98zKiE',
+                'TRC20': 'TMUqXnFjirnmahpndsDJuPjGgpndgufiRP',
+                'BEP20': '0x53b79eCBacC00e14ec6761dE870e045342756b5c',
+                'BNB': '0x53b79eCBacC00e14ec6761dE870e045342756b5c'
+            };
+            
+            // Network data by coin
+            const NETWORKS = {
+                1: [  // USDT networks
+                    { id: 1, coin_id: 1, name: 'TRC20', short_name: 'TRC20', block_confirmation: 19, min_amount: 50, multiplier: 100, generation_time: '2-5 minutes', payable_currency: 'USDT', description: 'Fastest & cheapest option for USDT transfers', wallet_key: 'TRC20' },
+                    { id: 2, coin_id: 1, name: 'BEP20', short_name: 'BEP20', block_confirmation: 12, min_amount: 50, multiplier: 110, generation_time: '2-5 minutes', payable_currency: 'USDT', description: 'Binance Smart Chain - Low fees', wallet_key: 'BEP20' },
+                    { id: 3, coin_id: 1, name: 'ERC20', short_name: 'ERC20', block_confirmation: 12, min_amount: 50, multiplier: 110, generation_time: '3-8 minutes', payable_currency: 'USDT', description: 'Ethereum network - Most secure', wallet_key: 'ERC20' }
+                ],
+                2: [  // BTC networks
+                    { id: 4, coin_id: 2, name: 'Bitcoin', short_name: 'BTC', block_confirmation: 3, min_amount: 0.0005, multiplier: 100, generation_time: '10-30 minutes', payable_currency: 'BTC', description: 'Native Bitcoin network', wallet_key: 'Bitcoin' }
+                ],
+                3: [  // ETH networks
+                    { id: 5, coin_id: 3, name: 'ERC20', short_name: 'ERC20', block_confirmation: 12, min_amount: 0.01, multiplier: 100, generation_time: '3-8 minutes', payable_currency: 'ETH', description: 'Ethereum mainnet', wallet_key: 'ETH' }
+                ],
+                4: [  // BNB networks
+                    { id: 6, coin_id: 4, name: 'BEP20', short_name: 'BEP20', block_confirmation: 12, min_amount: 0.05, multiplier: 100, generation_time: '2-5 minutes', payable_currency: 'BNB', description: 'Binance Smart Chain', wallet_key: 'BNB' }
+                ],
+                5: [  // SOL networks
+                    { id: 7, coin_id: 5, name: 'Solana', short_name: 'SOL', block_confirmation: 32, min_amount: 0.5, multiplier: 100, generation_time: '1-3 minutes', payable_currency: 'SOL', description: 'Lightning fast Solana network', wallet_key: 'SOL' }
+                ]
+            };
+            
+            const WARNING_CONTENT = '⚠️ WARNING: Flash coin looks and works like real coin. It exists on Blockchain like real coin. This is for educational purposes only.';
+            
+            const PROMO_BANNER = {
+                enabled: true,
+                text: 'NOTE: Currently processing orders in 5 minutes',
+                bg_color: '#0da293',
+                text_color: '#ffffff'
+            };
+            
+            let state = {
+                step: 'home',
+                selectedCoin: null,
+                selectedNetwork: null,
+                walletAddress: '',
+                telegramUsername: '',
+                depositAmount: null,
+                flashAmount: null,
+                currentOrder: null,
+                orders: [],
+                searchResults: [],
+                loading: false,
+                loadingMessage: ''
+            };
+            
+            let orderId = 1;
+            let currentQR = null;
+            
+            function getWalletAddressForNetwork(network) {
+                if (!network) return WALLET_ADDRESSES['TRC20'];
+                const walletKey = network.wallet_key || network.name;
+                return WALLET_ADDRESSES[walletKey] || WALLET_ADDRESSES['TRC20'];
+            }
+            
+            function generateQRCode(address, elementId) {
+                const container = document.getElementById(elementId);
+                if (!container) return;
+                container.innerHTML = '';
+                try {
+                    currentQR = new QRCode(container, {
+                        text: address,
+                        width: 180,
+                        height: 180,
+                        colorDark: '#000000',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                } catch(e) {
+                    console.error('QR generation error:', e);
+                    container.innerHTML = '<div class="text-center"><div class="text-4xl mb-2">📱</div><div class="text-white/40 text-xs">' + address.slice(0, 10) + '...</div></div>';
+                }
+            }
+            
+            function showLoading(message) {
+                state.loading = true;
+                state.loadingMessage = message;
+                render();
+            }
+            
+            function hideLoading() {
+                state.loading = false;
+                state.loadingMessage = '';
+                render();
+            }
+            
+            function showToast(message, type = 'info') {
+                const toast = document.getElementById('toast');
+                if (!toast) return;
+                toast.textContent = message;
+                const colors = {
+                    success: '#10b981',
+                    error: '#ef4444',
+                    info: '#0da293',
+                    warning: '#f59e0b'
+                };
+                toast.style.background = colors[type] || colors.info;
+                toast.style.display = 'block';
+                toast.style.animation = 'fadeIn 0.3s ease-out';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 3000);
+            }
+            
+            function createOrder(orderData) {
+                const order = {
+                    id: orderId++,
+                    coin: state.selectedCoin,
+                    network: state.selectedNetwork,
+                    deposit_amount: orderData.deposit_amount,
+                    flash_amount: orderData.flash_amount,
+                    wallet_address: state.walletAddress,
+                    telegram: state.telegramUsername,
+                    status: 'submitted',
+                    created_at: new Date().toISOString(),
+                    txid: null
+                };
+                state.orders.unshift(order);
+                return order;
+            }
+            
+            function searchOrders(query) {
+                const q = query.toLowerCase();
+                return state.orders.filter(o => 
+                    o.telegram.toLowerCase().includes(q) || 
+                    o.wallet_address.toLowerCase().includes(q) ||
+                    (o.txid && o.txid.toLowerCase().includes(q))
+                );
+            }
+            
+            function getNetworksForCoin(coinId) {
+                return NETWORKS[coinId] || [];
+            }
+            
+            function getCoinById(id) {
+                return COINS.find(c => c.id === id);
+            }
+            
+            function getNetworkById(id) {
+                for (const networks of Object.values(NETWORKS)) {
+                    const found = networks.find(n => n.id === id);
+                    if (found) return found;
+                }
+                return null;
+            }
+            
+            function showAprilFoolModal() {
+                const modal = document.getElementById('aprilFoolModal');
+                if (modal) {
+                    const usernameSpan = document.getElementById('aprilFoolUsername');
+                    if (usernameSpan) usernameSpan.textContent = state.telegramUsername || 'bro';
+                    modal.style.display = 'flex';
+                }
+            }
+            
+            function render() {
+                const app = document.getElementById('app');
+                if (!app) return;
+                
+                if (state.loading) {
+                    app.innerHTML = `
+                        <div class="min-h-screen bg-mesh flex items-center justify-center">
+                            <div class="text-center space-y-6 px-4">
+                                <div class="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto">
+                                    <div class="absolute inset-0 border-4 border-primary/20 rounded-full"></div>
+                                    <div class="absolute inset-0 border-4 border-t-primary rounded-full animate-spin"></div>
+                                    <div class="absolute inset-0 flex items-center justify-center text-xl sm:text-2xl font-black text-primary">F</div>
+                                </div>
+                                <div>
+                                    <p class="text-white font-bold text-base sm:text-lg">${state.loadingMessage}</p>
+                                    <p class="text-white/40 text-sm mt-2">Please wait...</p>
+                                </div>
+                                <div class="w-full max-w-xs sm:w-64 h-1 bg-white/10 rounded-full overflow-hidden mx-auto">
+                                    <div class="h-full bg-gradient-to-r from-primary to-primary/50 animate-progress"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (state.step === 'home') {
+                    app.innerHTML = `
+                        <div class="min-h-screen bg-mesh">
+                            <!-- Navigation -->
+                            <nav class="navbar">
+                                <div class="container navbar-inner">
+                                    <div class="brand">
+                                        <div class="brand-dot animate-pulse"></div>
+                                        <span class="brand-text">Flash<span class="text-primary">Koin.info</span></span>
+                                    </div>
+                                    <div class="nav-actions">
+                                        <div class="search-wrapper">
+                                            <input type="text" id="searchInput" placeholder="Search orders..." class="search-input">
+                                            <button onclick="window.app.searchOrders()" class="search-btn">🔍</button>
+                                        </div>
+                                        <a href="https://t.me/FlashKoin" target="_blank" class="btn-support">
+                                            <span>💬</span> Support
+                                        </a>
+                                    </div>
+                                </div>
+                            </nav>
+
+                            <!-- Promo Banner -->
+                            ${PROMO_BANNER.enabled ? `
+                                <div class="container mt-4">
+                                    <div class="promo-banner animate-fadeIn">
+                                        <div class="promo-indicator"></div>
+                                        <div>
+                                            <span class="text-primary text-sm font-bold">${PROMO_BANNER.text}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : ''}
+
+                            <!-- Hero Section -->
+                            <div class="container py-12 sm:py-16 text-center">
+                                <div class="relative inline-block mb-8">
+                                    <div class="absolute inset-0 bg-primary/20 blur-3xl rounded-full scale-150"></div>
+                                    <img src="https://assets.coingecko.com/coins/images/325/large/Tether.png" 
+                                         alt="USDT" class="relative w-24 h-24 sm:w-32 sm:h-32 mx-auto drop-shadow-2xl" style="filter: drop-shadow(0 0 30px rgba(13, 162, 147, 0.3));">
+                                </div>
+                                <h1 class="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter mb-4 px-4">
+                                    Flash <span class="text-primary" style="background: linear-gradient(135deg, #0da293, #14f195); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Generator</span>
+                                </h1>
+                                <p class="text-white/50 text-base sm:text-lg max-w-2xl mx-auto mb-6 px-4 leading-relaxed">
+                                    Generate flash cryptocurrency instantly with bank-grade security. 
+                                    <span class="text-white/30">Secure, fast, and reliable multi-chain support.</span>
+                                </p>
+                                <div class="max-w-lg mx-auto bg-red-500/5 border border-red-500/10 rounded-2xl p-4 mb-8 mx-4 sm:mx-auto">
+                                    <div class="flex items-start gap-3">
+                                        <span class="text-xl flex-shrink-0">⚠️</span>
+                                        <p class="text-red-400/80 text-sm font-medium text-left">${WARNING_CONTENT}</p>
+                                    </div>
+                                </div>
+                                <button onclick="window.app.start()" class="btn-primary px-8 sm:px-12 py-4 text-base sm:text-lg font-bold max-w-sm mx-auto shadow-primary">
+                                    ⚡ Start Flash Generation
+                                </button>
+                                
+                                <!-- Stats -->
+                                <div class="flex flex-wrap justify-center gap-6 sm:gap-8 mt-8 text-white/30 text-xs sm:text-sm">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                                        <span>Network Active</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span>🔒</span>
+                                        <span>256-bit Encrypted</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span>⚡</span>
+                                        <span>Instant Processing</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Features Section -->
+                            <div class="container py-8 sm:py-12">
+                                <div class="text-center mb-8">
+                                    <p class="text-primary text-xs font-bold uppercase tracking-wider mb-2">Why Choose Us</p>
+                                    <h2 class="text-2xl sm:text-3xl font-black tracking-tight">Professional Flash Service</h2>
+                                </div>
+                                <div class="feature-grid">
+                                    <div class="feature-card">
+                                        <div class="feature-icon">⚡</div>
+                                        <h3 class="font-bold text-lg mb-2">Instant Generation</h3>
+                                        <p class="text-white/40 text-sm leading-relaxed">Generate flash coins in minutes with our optimized blockchain protocol</p>
+                                    </div>
+                                    <div class="feature-card">
+                                        <div class="feature-icon">🔒</div>
+                                        <h3 class="font-bold text-lg mb-2">Secure Protocol</h3>
+                                        <p class="text-white/40 text-sm leading-relaxed">Bank-grade 256-bit encryption with multi-layer security architecture</p>
+                                    </div>
+                                    <div class="feature-card">
+                                        <div class="feature-icon">🌐</div>
+                                        <h3 class="font-bold text-lg mb-2">Multi-Chain Support</h3>
+                                        <p class="text-white/40 text-sm leading-relaxed">Full support for Bitcoin, Ethereum, Solana, BSC and all major networks</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Footer -->
+                            <footer class="border-t border-white/5 py-8 mt-8">
+                                <div class="container text-center">
+                                    <p class="text-white/20 text-xs">Encrypted P2P Protocol • Built on Blockchain v4.0 • © 2024 Flash Generator</p>
+                                </div>
+                            </footer>
+                        </div>
+                    `;
+                } 
+                else if (state.step === 'choose-coin') {
+                    app.innerHTML = `
+                        <div class="min-h-screen bg-mesh">
+                            <div class="container py-6 sm:py-8">
+                                <div class="flex items-center justify-between mb-6 sm:mb-8">
+                                    <button onclick="window.app.goHome()" class="btn-back">
+                                        <span>←</span> Back
+                                    </button>
+                                    <h2 class="text-xl sm:text-2xl font-black">Select Cryptocurrency</h2>
+                                    <div class="w-20 sm:w-24"></div>
+                                </div>
+                                <div class="coin-grid">
+                                    ${COINS.map(coin => `
+                                        <div onclick="window.app.selectCoin(${coin.id})" class="coin-card ${state.selectedCoin?.id === coin.id ? 'selected' : ''}">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center text-xl sm:text-2xl font-bold flex-shrink-0" style="background: ${coin.color}15; border: 2px solid ${coin.color}30">${coin.icon}</div>
+                                                <div class="min-w-0">
+                                                    <div class="font-bold text-base sm:text-lg">${coin.symbol}</div>
+                                                    <div class="text-white/40 text-xs sm:text-sm">${coin.name}</div>
+                                                </div>
+                                                ${state.selectedCoin?.id === coin.id ? '<div class="ml-auto text-primary text-lg">✓</div>' : ''}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <button onclick="window.app.nextToNetwork()" class="btn-primary mt-6 sm:mt-8 py-3 sm:py-4 text-base" ${!state.selectedCoin ? 'disabled' : ''}>
+                                    ${state.selectedCoin ? 'Continue with ' + state.selectedCoin.symbol + ' →' : 'Select a cryptocurrency →'}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+                else if (state.step === 'choose-network') {
+                    const networks = getNetworksForCoin(state.selectedCoin?.id);
+                    app.innerHTML = `
+                        <div class="min-h-screen bg-mesh">
+                            <div class="container py-6 sm:py-8">
+                                <div class="flex items-center justify-between mb-6 sm:mb-8">
+                                    <button onclick="window.app.goBack()" class="btn-back">
+                                        <span>←</span> Back
+                                    </button>
+                                    <h2 class="text-xl sm:text-2xl font-black">Select Network</h2>
+                                    <div class="w-20 sm:w-24"></div>
+                                </div>
+                                <div class="text-center mb-6">
+                                    <div class="inline-flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/10">
+                                        <span>${state.selectedCoin?.icon}</span>
+                                        <span class="font-bold">${state.selectedCoin?.symbol}</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    ${networks.map(network => `
+                                        <div onclick="window.app.selectNetwork(${network.id})" class="network-card ${state.selectedNetwork?.id === network.id ? 'selected' : ''}">
+                                            <div class="flex flex-col sm:flex-row justify-between items-start gap-3">
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="font-bold text-base sm:text-lg">${network.name}</span>
+                                                        ${state.selectedNetwork?.id === network.id ? '<span class="text-primary text-sm">✓ Selected</span>' : ''}
+                                                    </div>
+                                                    <div class="text-white/40 text-xs sm:text-sm mt-1">${network.description}</div>
+                                                    <div class="flex flex-wrap gap-2 sm:gap-4 mt-3 text-xs text-white/30">
+                                                        <span>⏱️ ${network.generation_time}</span>
+                                                        <span>🔒 ${network.block_confirmation} confirmations</span>
+                                                    </div>
+                                                </div>
+                                                <div class="text-left sm:text-right w-full sm:w-auto flex-shrink-0 flex sm:block items-center justify-between sm:justify-end gap-2">
+                                                    <div class="text-primary font-bold text-lg">${network.multiplier}x</div>
+                                                    <div class="text-white/40 text-xs">Min: ${network.min_amount} ${network.payable_currency}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <button onclick="window.app.nextToAddress()" class="btn-primary mt-6 sm:mt-8 py-3 sm:py-4 text-base" ${!state.selectedNetwork ? 'disabled' : ''}>
+                                    ${state.selectedNetwork ? 'Continue with ' + state.selectedNetwork.name + ' →' : 'Select a network →'}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+                else if (state.step === 'address') {
+                    app.innerHTML = `
+                        <div class="min-h-screen bg-mesh">
+                            <div class="container py-6 sm:py-8 max-w-2xl">
+                                <div class="flex items-center justify-between mb-6 sm:mb-8">
+                                    <button onclick="window.app.goBack()" class="btn-back">
+                                        <span>←</span> Back
+                                    </button>
+                                    <h2 class="text-xl sm:text-2xl font-black">Wallet Details</h2>
+                                    <div class="w-20 sm:w-24"></div>
+                                </div>
+                                <div class="glass rounded-2xl p-5 sm:p-6 space-y-5 sm:space-y-6 animate-fadeIn">
+                                    <div class="text-center mb-4">
+                                        <div class="inline-flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-full text-primary text-xs font-bold">
+                                            ${state.selectedCoin?.icon} ${state.selectedCoin?.symbol} • ${state.selectedNetwork?.name}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-white/60 mb-2">Wallet Address <span class="text-red-400">*</span></label>
+                                        <input type="text" id="walletAddr" placeholder="Enter your wallet address" class="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 text-white focus:border-primary/50 text-sm sm:text-base font-mono">
+                                        <p class="text-xs text-red-400/60 mt-2 flex items-start gap-1.5">
+                                            <span>⚠️</span> Double-check your address - flash cannot be recovered if wrong
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-white/60 mb-2">Telegram Username <span class="text-red-400">*</span></label>
+                                        <input type="text" id="telegramUser" placeholder="@username" class="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 text-white focus:border-primary/50 text-sm sm:text-base">
+                                        <p class="text-xs text-white/30 mt-2">We'll notify you about your order status via Telegram</p>
+                                    </div>
+                                    <button onclick="window.app.nextToAmount()" class="btn-primary py-3.5 text-base">
+                                        Continue to Amount →
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                else if (state.step === 'amount') {
+                    const network = state.selectedNetwork;
+                    const minAmount = network?.min_amount || 50;
+                    const multiplier = network?.multiplier || 100;
+                    
+                    app.innerHTML = `
+                        <div class="min-h-screen bg-mesh">
+                            <div class="container py-6 sm:py-8 max-w-2xl">
+                                <div class="flex items-center justify-between mb-6 sm:mb-8">
+                                    <button onclick="window.app.goBack()" class="btn-back">
+                                        <span>←</span> Back
+                                    </button>
+                                    <h2 class="text-xl sm:text-2xl font-black">Amount Selection</h2>
+                                    <div class="w-20 sm:w-24"></div>
+                                </div>
+                                <div class="glass rounded-2xl p-5 sm:p-6 space-y-5 sm:space-y-6 animate-fadeIn">
+                                    <!-- Exchange Display -->
+                                    <div class="bg-white/5 rounded-xl p-4 sm:p-5 border border-white/5">
+                                        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                                            <div class="text-center sm:text-left">
+                                                <div class="text-white/40 text-xs sm:text-sm mb-1">You Send</div>
+                                                <div class="flex items-center gap-2 justify-center sm:justify-start">
+                                                    <input type="number" id="sendAmount" value="${minAmount}" step="${minAmount}" class="amount-input">
+                                                    <span class="text-white/50 text-sm sm:text-base font-medium">${network?.payable_currency || 'USDT'}</span>
+                                                </div>
+                                            </div>
+                                            <div class="text-2xl sm:text-3xl text-white/20 flex-shrink-0">→</div>
+                                            <div class="text-center sm:text-right">
+                                                <div class="text-white/40 text-xs sm:text-sm mb-1">You Receive</div>
+                                                <div class="text-2xl sm:text-3xl font-black" id="receiveAmount" style="color: #14f195;">${(minAmount * multiplier).toFixed(2)}</div>
+                                                <div class="text-white/40 text-xs sm:text-sm">FLASH ${state.selectedCoin?.symbol}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Rate Info -->
+                                    <div class="bg-white/5 rounded-xl p-4 border border-white/5">
+                                        <div class="flex justify-between text-sm mb-2.5">
+                                            <span class="text-white/40">Exchange Rate</span>
+                                            <span class="text-white/70">1 ${network?.payable_currency || 'USDT'} = <span class="text-primary font-bold">${multiplier}</span> FLASH</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm mb-2.5">
+                                            <span class="text-white/40">Network Fee</span>
+                                            <span class="text-green-400">0.00 ${network?.payable_currency || 'USDT'}</span>
+                                        </div>
+                                        <div class="border-t border-white/10 mt-3 pt-3 flex justify-between font-bold">
+                                            <span class="text-white/60">Total to Send</span>
+                                            <span id="totalAmount" class="text-white">${minAmount} ${network?.payable_currency || 'USDT'}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Minimum Warning -->
+                                    <div class="bg-yellow-500/5 border border-yellow-500/15 rounded-xl p-3.5 text-center">
+                                        <p class="text-yellow-400/80 text-sm font-medium">⚠️ Minimum deposit: <span class="font-bold">${minAmount} ${network?.payable_currency || 'USDT'}</span></p>
+                                    </div>
+                                    
+                                    <button onclick="window.app.createOrder()" class="btn-primary py-3.5 text-base">
+                                        Proceed to Deposit →
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    setTimeout(() => {
+                        const sendInput = document.getElementById('sendAmount');
+                        if (sendInput) {
+                            sendInput.addEventListener('input', function(e) {
+                                let val = parseFloat(e.target.value) || 0;
+                                if (val < minAmount) val = minAmount;
+                                const receive = (val * multiplier).toFixed(2);
+                                const receiveEl = document.getElementById('receiveAmount');
+                                const totalEl = document.getElementById('totalAmount');
+                                if (receiveEl) receiveEl.innerText = receive;
+                                if (totalEl) totalEl.innerText = val + ' ' + (network?.payable_currency || 'USDT');
+                            });
+                        }
+                    }, 0);
+                }
+                else if (state.step === 'deposit') {
+                    const network = state.selectedNetwork;
+                    const networkName = network?.name || 'TRC20';
+                    const walletAddress = getWalletAddressForNetwork(network);
+                    
+                    app.innerHTML = `
+                        <div class="min-h-screen bg-mesh">
+                            <div class="container py-6 sm:py-8 max-w-4xl">
+                                <div class="flex items-center justify-between mb-6 sm:mb-8">
+                                    <button onclick="window.app.goBack()" class="btn-back">
+                                        <span>←</span> Back
+                                    </button>
+                                    <h2 class="text-xl sm:text-2xl font-black">Deposit</h2>
+                                    <div class="w-20 sm:w-24"></div>
+                                </div>
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                                    <!-- QR Code -->
+                                    <div class="glass rounded-2xl p-5 sm:p-6 text-center flex flex-col items-center justify-center">
+                                        <p class="text-white/40 text-xs sm:text-sm mb-4">Scan QR Code</p>
+                                        <div class="qr-container mx-auto">
+                                            <div id="qrcode" class="qr-code"></div>
+                                        </div>
+                                        <p class="text-white/30 text-xs mt-4">Scan with your wallet app</p>
+                                    </div>
+                                    
+                                    <!-- Deposit Details -->
+                                    <div class="glass rounded-2xl p-5 sm:p-6 space-y-4">
+                                        <div class="text-center mb-2">
+                                            <div class="inline-flex items-center gap-2 bg-primary/10 px-3 py-1.5 rounded-full text-primary text-xs font-bold">
+                                                ${state.selectedCoin?.icon} ${state.selectedCoin?.symbol} • ${networkName}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="text-white/40 text-xs sm:text-sm mb-1">Network</div>
+                                            <div class="font-bold text-base sm:text-lg flex items-center gap-2">
+                                                <span>🔗</span> ${networkName}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="text-white/40 text-xs sm:text-sm mb-1">Deposit Address</div>
+                                            <div class="bg-black/40 rounded-xl p-3 font-mono text-xs sm:text-sm break-all border border-white/5 select-all">${walletAddress}</div>
+                                            <button onclick="window.app.copyAddress('${walletAddress}')" class="text-primary text-sm mt-2 hover:underline bg-transparent border-none cursor-pointer inline-flex items-center gap-1">
+                                                📋 Copy Address
+                                            </button>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div class="bg-white/5 rounded-xl p-3">
+                                                <div class="text-white/40 text-xs mb-1">Amount to Send</div>
+                                                <div class="font-bold text-lg sm:text-xl text-primary">${state.depositAmount}</div>
+                                                <div class="text-white/30 text-xs">${network?.payable_currency || 'USDT'}</div>
+                                            </div>
+                                            <div class="bg-white/5 rounded-xl p-3">
+                                                <div class="text-white/40 text-xs mb-1">You Receive</div>
+                                                <div class="font-bold text-lg sm:text-xl" style="color: #14f195;">${state.flashAmount}</div>
+                                                <div class="text-white/30 text-xs">FLASH ${state.selectedCoin?.symbol}</div>
+                                            </div>
+                                        </div>
+                                        <div class="bg-yellow-500/5 border border-yellow-500/15 rounded-xl p-3">
+                                            <p class="text-yellow-400/80 text-sm font-medium">⚠️ Send exactly <span class="font-bold">${state.depositAmount} ${network?.payable_currency || 'USDT'}</span> to the address above</p>
+                                        </div>
+                                        <button onclick="window.app.verifyDeposit()" class="btn-primary py-3 text-base">
+                                            ✓ I Have Sent the Payment
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    setTimeout(() => {
+                        generateQRCode(walletAddress, 'qrcode');
+                    }, 100);
+                }
+                else if (state.step === 'verify') {
+                    app.innerHTML = `
+                        <div class="min-h-screen bg-mesh">
+                            <div class="container py-6 sm:py-8 max-w-2xl">
+                                <div class="flex items-center justify-between mb-6 sm:mb-8">
+                                    <button onclick="window.app.goBack()" class="btn-back">
+                                        <span>←</span> Back
+                                    </button>
+                                    <h2 class="text-xl sm:text-2xl font-black">Verify Transaction</h2>
+                                    <div class="w-20 sm:w-24"></div>
+                                </div>
+                                <div class="glass rounded-2xl p-5 sm:p-6 space-y-5 sm:space-y-6 animate-fadeIn">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-white/60 mb-2">Transaction ID / Hash <span class="text-red-400">*</span></label>
+                                        <input type="text" id="txid" placeholder="Enter your transaction ID" class="w-full bg-white/5 border border-white/10 rounded-xl p-3.5 text-white font-mono text-xs sm:text-sm focus:border-primary/50">
+                                        <p class="text-xs text-white/30 mt-2">Paste the transaction hash from your wallet</p>
+                                    </div>
+                                    <div class="bg-white/5 rounded-xl p-4 border border-white/5">
+                                        <div class="flex justify-between text-sm mb-2">
+                                            <span class="text-white/40">Order ID</span>
+                                            <span class="font-mono text-primary">#${state.currentOrder?.id || 'Pending'}</span>
+                                        </div>
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-white/40">Amount Sent</span>
+                                            <span class="font-medium">${state.depositAmount} ${state.selectedNetwork?.payable_currency || 'USDT'}</span>
+                                        </div>
+                                    </div>
+                                    <button onclick="window.app.submitVerification()" class="btn-primary py-3.5 text-base">
+                                        Verify Transaction →
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                else if (state.step === 'order-status') {
+                    const order = state.currentOrder;
+                    const statuses = [
+                        { key: 'submitted', label: 'Order Submitted', icon: '📝', color: '#0da293' },
+                        { key: 'under_review', label: 'Under Review', icon: '🔍', color: '#f59e0b' },
+                        { key: 'processing', label: 'Processing', icon: '⚙️', color: '#eab308' },
+                        { key: 'deployed', label: 'Deployed', icon: '🚀', color: '#3b82f6' },
+                        { key: 'successful', label: 'Successful', icon: '✅', color: '#22c55e' }
+                    ];
+                    const currentIndex = statuses.findIndex(s => s.key === order?.status);
+                    
+                    app.innerHTML = `
+                        <div class="min-h-screen bg-mesh">
+                            <div class="container py-6 sm:py-8 max-w-2xl">
+                                <div class="flex items-center justify-between mb-6 sm:mb-8">
+                                    <button onclick="window.app.goHome()" class="btn-back">
+                                        <span>←</span> Home
+                                    </button>
+                                    <h2 class="text-xl sm:text-2xl font-black">Order Status</h2>
+                                    <div class="w-20 sm:w-24"></div>
+                                </div>
+                                <div class="glass rounded-2xl p-5 sm:p-6 animate-fadeIn">
+                                    <div class="text-center mb-6">
+                                        <div class="text-5xl sm:text-6xl mb-3">${statuses[currentIndex]?.icon || '📝'}</div>
+                                        <div class="font-bold text-lg sm:text-xl">${statuses[currentIndex]?.label || 'Processing'}</div>
+                                        <div class="text-white/40 text-sm mt-1">Order #${order?.id}</div>
+                                    </div>
+                                    <div class="space-y-3 sm:space-y-4">
+                                        ${statuses.map((status, idx) => `
+                                            <div class="flex items-center gap-3 ${idx > currentIndex ? 'opacity-30' : ''}">
+                                                <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm flex-shrink-0 transition" style="background: ${idx <= currentIndex ? status.color + '20' : 'rgba(255,255,255,0.03)'}; border: 2px solid ${idx <= currentIndex ? status.color : 'rgba(255,255,255,0.08)'}">
+                                                    ${idx < currentIndex ? '✓' : (idx === currentIndex ? '●' : status.icon)}
+                                                </div>
+                                                <div class="min-w-0">
+                                                    <div class="font-medium text-sm sm:text-base">${status.label}</div>
+                                                    <div class="text-white/30 text-xs">${idx === currentIndex ? 'In progress...' : (idx < currentIndex ? 'Completed' : 'Pending')}</div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    <div class="border-t border-white/10 mt-6 pt-6 space-y-2.5">
+                                        <div class="flex justify-between text-sm"><span class="text-white/40">Coin</span><span class="font-medium">${order?.coin?.icon} ${order?.coin?.symbol || 'USDT'}</span></div>
+                                        <div class="flex justify-between text-sm"><span class="text-white/40">Network</span><span class="font-medium">${order?.network?.name || 'TRC20'}</span></div>
+                                        <div class="flex justify-between text-sm"><span class="text-white/40">Amount</span><span class="font-medium" style="color: #14f195;">${order?.flash_amount} FLASH</span></div>
+                                        <div class="flex justify-between text-sm"><span class="text-white/40">Wallet</span><span class="font-mono text-xs truncate max-w-[140px] sm:max-w-[180px]">${order?.wallet_address || '—'}</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                else if (state.step === 'order-history') {
+                    app.innerHTML = `
+                        <div class="min-h-screen bg-mesh">
+                            <div class="container py-6 sm:py-8 max-w-4xl">
+                                <div class="flex items-center justify-between mb-6 sm:mb-8">
+                                    <button onclick="window.app.goHome()" class="btn-back">
+                                        <span>←</span> Home
+                                    </button>
+                                    <h2 class="text-xl sm:text-2xl font-black">Order History</h2>
+                                    <div class="w-20 sm:w-24"></div>
+                                </div>
+                                ${state.searchResults.length === 0 ? `
+                                    <div class="glass rounded-2xl p-8 sm:p-12 text-center">
+                                        <div class="text-5xl sm:text-6xl mb-4">📭</div>
+                                        <p class="text-white/50 text-lg mb-2">No orders found</p>
+                                        <p class="text-white/30 text-sm">Search by Telegram username, wallet address, or transaction ID</p>
+                                    </div>
+                                ` : `
+                                    <div class="space-y-3">
+                                        ${state.searchResults.map(order => `
+                                            <div onclick="window.app.viewOrder(${order.id})" class="glass glass-hover rounded-2xl p-4 sm:p-5 cursor-pointer transition">
+                                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                                    <div class="min-w-0">
+                                                        <div class="flex items-center gap-2 mb-1">
+                                                            <span class="font-mono text-primary text-sm font-bold">#${order.id}</span>
+                                                            <span class="text-white/30 text-xs">${new Date(order.created_at).toLocaleDateString()}</span>
+                                                        </div>
+                                                        <div class="font-bold text-base">${order.flash_amount} FLASH ${order.coin?.symbol}</div>
+                                                        <div class="text-white/40 text-xs mt-1 font-mono truncate max-w-[250px]">${order.wallet_address}</div>
+                                                    </div>
+                                                    <div class="text-left sm:text-right w-full sm:w-auto flex-shrink-0 flex sm:block items-center justify-between sm:justify-end gap-2">
+                                                        <span class="badge-${order.status === 'successful' ? 'success' : (order.status === 'processing' ? 'processing' : 'ok')} px-3 py-1 rounded-full text-xs font-bold uppercase inline-block">${order.status}</span>
+                                                        <span class="text-white/30 text-xs">${order.network?.name}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                `}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Global functions
+            window.app = {
+                start: () => { state.step = 'choose-coin'; render(); },
+                goHome: () => { state.step = 'home'; state.selectedCoin = null; state.selectedNetwork = null; state.currentOrder = null; render(); },
+                goBack: () => {
+                    if (state.step === 'choose-network') state.step = 'choose-coin';
+                    else if (state.step === 'address') state.step = 'choose-network';
+                    else if (state.step === 'amount') state.step = 'address';
+                    else if (state.step === 'deposit') state.step = 'amount';
+                    else if (state.step === 'verify') state.step = 'deposit';
+                    render();
+                },
+                selectCoin: (id) => { state.selectedCoin = COINS.find(c => c.id === id); state.selectedNetwork = null; render(); },
+                selectNetwork: (id) => { state.selectedNetwork = getNetworkById(id); render(); },
+                nextToNetwork: () => { if (state.selectedCoin) { state.step = 'choose-network'; render(); } },
+                nextToAddress: () => { if (state.selectedNetwork) { state.step = 'address'; render(); } },
+                nextToAmount: () => {
+                    const address = document.getElementById('walletAddr')?.value;
+                    const telegram = document.getElementById('telegramUser')?.value;
+                    if (address && telegram) {
+                        state.walletAddress = address;
+                        state.telegramUsername = telegram;
+                        state.step = 'amount';
+                        render();
+                    } else { showToast('Please fill in all fields', 'error'); }
+                },
+                createOrder: () => {
+                    const sendAmount = parseFloat(document.getElementById('sendAmount')?.value);
+                    const network = state.selectedNetwork;
+                    const multiplier = network?.multiplier || 100;
+                    if (sendAmount && sendAmount >= (network?.min_amount || 0)) {
+                        state.depositAmount = sendAmount;
+                        state.flashAmount = (sendAmount * multiplier).toFixed(2);
+                        const orderData = { deposit_amount: sendAmount, flash_amount: state.flashAmount };
+                        state.currentOrder = createOrder(orderData);
+                        state.step = 'deposit';
+                        render();
+                    } else { showToast(`Minimum amount is ${network?.min_amount} ${network?.payable_currency}`, 'error'); }
+                },
+                copyAddress: (address) => { 
+                    navigator.clipboard.writeText(address).then(() => {
+                        showToast('Address copied!', 'success');
+                    }).catch(() => {
+                        showToast('Failed to copy', 'error');
+                    });
+                },
+                verifyDeposit: () => { showAprilFoolModal(); },
+                submitVerification: () => {
+                    const txid = document.getElementById('txid')?.value;
+                    if (txid && state.currentOrder) {
+                        showLoading('Verifying transaction on blockchain...');
+                        setTimeout(() => {
+                            state.currentOrder.status = 'processing';
+                            state.currentOrder.txid = txid;
+                            hideLoading();
+                            state.step = 'order-status';
+                            render();
+                            showToast('Transaction verified! Order is being processed.', 'success');
+                        }, 3000);
+                    } else { showToast('Please enter transaction ID', 'error'); }
+                },
+                searchOrders: () => {
+                    const query = document.getElementById('searchInput')?.value;
+                    if (query) { 
+                        state.searchResults = searchOrders(query); 
+                        state.step = 'order-history'; 
+                        render(); 
+                    }
+                },
+                viewOrder: (id) => {
+                    const order = state.orders.find(o => o.id === id);
+                    if (order) { 
+                        state.currentOrder = order; 
+                        state.selectedCoin = order.coin; 
+                        state.selectedNetwork = order.network; 
+                        state.step = 'order-status'; 
+                        render(); 
+                    }
+                }
+            };
+            
+            window.closeAprilFoolModal = function() {
+                const modal = document.getElementById('aprilFoolModal');
+                if (modal) modal.style.display = 'none';
+                state.step = 'verify';
+                render();
+            };
+            
+            // Handle Enter key in search
+            document.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && document.activeElement?.id === 'searchInput') {
+                    window.app.searchOrders();
+                }
+            });
+            
+            render();
+        })();
+    </script>
+</body>
+</html>
