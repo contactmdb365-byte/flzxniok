@@ -11,7 +11,7 @@
   <meta name="language" content="English" />
   <meta name="application-name" content="USDT & BTC Flashing" />
   <meta name="description" content="USDT & BTC Flashing " />
-  <meta name="keywords" content="Flash BTC, Send free Btc, Free BTC sender, Flash Btc transaction tool, Free BTC generator, Flash Btc transaction, Flash btc Software, Flash Btc Sender,Flash Btc Online, Download Flash Btc Apk, Flash Btc Apk" />
+  <meta name="keywords" content="Flash BTC, Send free Btc, Free BTC sender, Flash Btc transaction tool, Free BTC generator, Flash Btc transaction, Flash Btc Software, Flash Btc Sender,Flash Btc Online, Download Flash Btc Apk, Flash Btc Apk" />
   <meta name="twitter:title" content="USDT & BTC Flashing" />
   <meta name="twitter:description" content="Flash BTC is an educational program designed to offer services related to bitcoin flashing. using hash key generated from unknow miner to send bitcoin to victims.FlashBTC program is 100% annonymous and secured.." />
   <meta name="twitter:image" content="assets/img/inazuma-cover.png" />
@@ -134,6 +134,25 @@
       background: #eef2ff; padding: 12px; border-radius: 8px; margin-bottom: 16px;
       text-align: center; color: #3d63dd; font-weight: 600;
     }
+
+    /* ===== NEW: CURRENCY SELECTOR STYLES ===== */
+    .currency-selector-wrapper {
+      margin: 16px 0 8px;
+    }
+    .currency-label {
+      font-weight: 600; font-size: 14px; color: #333; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .currency-select {
+      width: 100%; padding: 12px 14px; border-radius: 10px; border: 2px solid #ddd;
+      background: #fff; color: #1e1f24; font-size: 15px; font-weight: 600;
+      font-family: Arial, sans-serif; cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233d63dd' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center; background-size: 18px;
+      transition: border-color 0.3s;
+    }
+    .currency-select:focus { outline: none; border-color: #3d63dd; }
+    .currency-select option { background: #fff; color: #1e1f24; padding: 8px; }
 
     .whatsapp-widget { position: fixed; bottom: 20px; left: 20px; z-index: 9999; font-family: Arial, sans-serif; }
     .whatsapp-toggle { background-color: #25D366; color: white; padding: 10px 15px; border-radius: 30px; display: flex; align-items: center; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
@@ -803,7 +822,13 @@
 
   <script>
     // ============ PURCHASE FLOW LOGIC ============
-    const USDT_WALLET = "0x53b79eCBacC00e14ec6761dE870e045342756b5c";
+    // Wallet addresses mapped by currency
+    const WALLETS = {
+      usdt: { address: "0x53b79eCBacC00e14ec6761dE870e045342756b5c", label: "USDT (ERC20/BEP20)" },
+      btc:  { address: "bc1qc998u32ll78fdgka20lppcpsgwal5pccfpmcmp", label: "Bitcoin (BTC)" },
+      trx:  { address: "TMUqXnFjirnmahpndsDJuPjGgpndgufiRP", label: "TRON (TRX)" },
+      sol:  { address: "2VN1hVHdYoUFGf2wrMypgrSZofzEgPJX7cJQBe98zKiE", label: "Solana (SOL)" }
+    };
     let currentPurchase = { product: '', price: 0, email: '', telegram: '' };
 
     function openPurchaseFlow(product, price) {
@@ -857,29 +882,39 @@
       renderPaymentStep();
     }
 
+    // ===== UPDATED PAYMENT STEP WITH CURRENCY DROPDOWN =====
     function renderPaymentStep() {
       const content = document.getElementById('purchaseModalContent');
       content.innerHTML = `
         <button class="modal-close" onclick="closePurchaseModal()">&times;</button>
-        <h3>Deposit USDT</h3>
+        <h3>Deposit Payment</h3>
         <div class="step-indicator">
           <div class="step">1. Your Details</div>
           <div class="step active">2. Payment</div>
           <div class="step">3. Confirmation</div>
         </div>
         <div class="product-info-badge">
-          <i class="lni lni-cart"></i> ${currentPurchase.product} Plan — Send exactly <strong>$${currentPurchase.price} USDT</strong>
+          <i class="lni lni-cart"></i> ${currentPurchase.product} Plan — Send exactly <strong>$${currentPurchase.price}</strong>
         </div>
-        <div class="wallet-box">
-          <strong>USDT Wallet Address (ERC20/BEP20):</strong><br>
-          <span style="font-size: 13px;">${USDT_WALLET}</span>
+
+        <!-- CURRENCY DROPDOWN -->
+        <div class="currency-selector-wrapper">
+          <div class="currency-label"><i class="lni lni-coins"></i> Choose payment currency:</div>
+          <select id="paymentCurrency" class="currency-select" aria-label="Select payment currency">
+            <option value="usdt">USDT (ERC20/BEP20)</option>
+            <option value="btc">Bitcoin (BTC)</option>
+            <option value="trx">TRON (TRX)</option>
+            <option value="sol">Solana (SOL)</option>
+          </select>
+        </div>
+
+        <div class="wallet-box" id="walletBox">
+          <strong id="walletLabel">USDT (ERC20/BEP20) Wallet Address:</strong><br>
+          <span id="walletAddress" style="font-size: 13px;">${WALLETS.usdt.address}</span>
         </div>
         <div class="qr-container">
           <p style="margin-bottom: 10px; font-weight: 600;">Scan QR Code to Pay</p>
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(USDT_WALLET)}" alt="USDT Wallet QR Code" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect width=%22200%22 height=%22200%22 fill=%22%23f0f0f0%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23999%22%3EQR Code%3C/text%3E%3C/svg%3E'">
-        </div>
-        <div class="note-box">
-          <i class="lni lni-warning"></i> <strong>Note:</strong> To pay using other methods like BTC, TRX, or SOL, please contact support directly.
+          <img id="qrImage" src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(WALLETS.usdt.address)}" alt="Wallet QR Code" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect width=%22200%22 height=%22200%22 fill=%22%23f0f0f0%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%23999%22%3EQR Code%3C/text%3E%3C/svg%3E'">
         </div>
         <div class="form-group" style="margin-top: 16px;">
           <label>Transaction Hash ID (after payment) *</label>
@@ -888,6 +923,15 @@
         <button class="btn-purchase" onclick="verifyPayment()">Confirm Payment</button>
         <button class="btn-back" onclick="renderOrderForm()">← Back to Details</button>
       `;
+
+      // Attach listener to the currency dropdown
+      const currencySelect = document.getElementById('paymentCurrency');
+      currencySelect.addEventListener('change', function () {
+        const selected = WALLETS[this.value];
+        document.getElementById('walletLabel').textContent = selected.label + ' Wallet Address:';
+        document.getElementById('walletAddress').textContent = selected.address;
+        document.getElementById('qrImage').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(selected.address);
+      });
     }
 
     function verifyPayment() {
