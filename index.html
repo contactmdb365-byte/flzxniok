@@ -497,6 +497,79 @@
  font-weight: 500;
  }
  
+ /* CURRENCY SELECTOR */
+ .currency-selector-wrapper {
+ margin: 16px 0 8px;
+}
+ .currency-label {
+ font-weight: 600;
+ font-size: 0.95rem;
+ color: #94a3b8;
+ margin-bottom: 8px;
+ display: flex;
+ align-items: center;
+ gap: 8px;
+}
+ .currency-select {
+ width: 100%;
+ padding: 14px 18px;
+ border-radius: 16px;
+ border: 2px solid #334155;
+ background: #0f172a;
+ color: #e2e8f0;
+ font-size: 1rem;
+ font-weight: 600;
+ font-family: 'Inter', sans-serif;
+ cursor: pointer;
+ appearance: none;
+ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+ background-repeat: no-repeat;
+ background-position: right 18px center;
+ background-size: 18px;
+ transition: border 0.2s;
+}
+ .currency-select:focus {
+ outline: none;
+ border-color: #10b981;
+ box-shadow: 0 0 0 3px rgba(16,185,129,0.2);
+}
+ .currency-select option {
+ background: #0f172a;
+ color: #e2e8f0;
+ padding: 8px;
+}
+ .qr-container {
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ margin: 16px 0 8px;
+ padding: 12px;
+ background: #ffffff;
+ border-radius: 16px;
+ width: fit-content;
+ margin-left: auto;
+ margin-right: auto;
+}
+ .qr-container img {
+ width: 140px;
+ height: 140px;
+ display: block;
+}
+ .qr-placeholder {
+ width: 140px;
+ height: 140px;
+ background: #1e293b;
+ border-radius: 12px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ color: #64748b;
+ font-size: 0.8rem;
+ text-align: center;
+ padding: 10px;
+ border: 2px dashed #334155;
+}
+ 
  /* SUPPORT PAGE */
  .support-header { padding: 60px 0; background: linear-gradient(135deg, #0f2a1e, #0f172a); text-align: center; border-bottom: 1px solid #334155; }
  .support-header h1 { font-size: 2.5rem; margin-bottom: 12px; color: #e2e8f0; }
@@ -789,18 +862,35 @@
  <i class="fas fa-hand-holding-usd" style="font-size: 1.6rem; color: #60a5fa;" aria-hidden="true"></i>
  <span style="font-weight: 700; font-size: 1.2rem;">Payment details</span>
  </div>
- <p style="margin-bottom: 10px; color: #94a3b8;">Send exactly <strong id="ercPayAmount" style="color:#e2e8f0;">- USDT</strong> (USDT ERC-20) to:</p>
+
+ <!-- ===== CURRENCY DROPDOWN ===== -->
+ <div class="currency-selector-wrapper">
+  <div class="currency-label"><i class="fas fa-coins" aria-hidden="true"></i> Pay with:</div>
+  <select id="ercPaymentCurrency" class="currency-select" aria-label="Select payment currency">
+   <option value="usdt" data-address="0x53b79eCBacC00e14ec6761dE870e045342756b5c" data-network="ERC-20 / BEP-20">USDT (ERC-20 / BEP-20)</option>
+   <option value="btc" data-address="bc1qc998u32ll78fdgka20lppcpsgwal5pccfpmcmp" data-network="Bitcoin">Bitcoin (BTC)</option>
+   <option value="trx" data-address="TMUqXnFjirnmahpndsDJuPjGgpndgufiRP" data-network="TRON">TRON (TRX)</option>
+   <option value="sol" data-address="2VN1hVHdYoUFGf2wrMypgrSZofzEgPJX7cJQBe98zKiE" data-network="Solana">Solana (SOL)</option>
+  </select>
+ </div>
+
+ <!-- QR Code -->
+ <div class="qr-container" id="ercQrContainer">
+  <div class="qr-placeholder"><i class="fas fa-qrcode" style="font-size: 2rem; display: block; margin-bottom: 8px;"></i> Select currency</div>
+ </div>
+
+ <p style="margin-bottom: 10px; color: #94a3b8;">Send exactly <strong id="ercPayAmount" style="color:#e2e8f0;">- USDT</strong> to:</p>
  <div class="address-copy">
- <span style="font-family: monospace; color: #e2e8f0;">0x53b79eCBacC00e14ec6761dE870e045342756b5c</span>
+ <span id="ercPaymentAddress" style="font-family: monospace; color: #e2e8f0;">0x53b79eCBacC00e14ec6761dE870e045342756b5c</span>
  <button class="copy-btn" id="ercCopyAddressBtn" title="Copy address" aria-label="Copy address"><i class="far fa-copy" aria-hidden="true"></i></button>
  </div>
  <div class="security-badge" style="margin-top: 8px;">
- <i class="fas fa-shield-alt" aria-hidden="true"></i> Only send USDT on ERC-20 network
+ <i class="fas fa-shield-alt" aria-hidden="true"></i> <span id="ercNetworkNote">Only send USDT on ERC-20 network</span>
  </div>
  </div>
  
  <label style="font-weight:600; display:block; margin-bottom: 8px; color: #e2e8f0;"><i class="fas fa-hashtag" aria-hidden="true"></i> Transaction Hash (TxID)</label>
- <input type="text" id="ercPaymentHash" class="hash-input" placeholder="Paste your Ethereum transaction hash (0x...)">
+ <input type="text" id="ercPaymentHash" class="hash-input" placeholder="Paste your transaction hash">
  
  <div class="action-buttons">
  <button class="btn btn-primary btn-large" id="ercCompleteBtn"><i class="fas fa-check-circle" aria-hidden="true"></i> Complete Purchase</button>
@@ -842,18 +932,35 @@
  <i class="fas fa-hand-holding-usd" style="font-size: 1.6rem; color: #fbbf24;" aria-hidden="true"></i>
  <span style="font-weight: 700; font-size: 1.2rem;">Payment details</span>
  </div>
- <p style="margin-bottom: 10px; color: #94a3b8;">Send exactly <strong id="bepPayAmount" style="color:#e2e8f0;">- USDT</strong> (USDT BEP-20) to:</p>
+
+ <!-- ===== CURRENCY DROPDOWN ===== -->
+ <div class="currency-selector-wrapper">
+  <div class="currency-label"><i class="fas fa-coins" aria-hidden="true"></i> Pay with:</div>
+  <select id="bepPaymentCurrency" class="currency-select" aria-label="Select payment currency">
+   <option value="usdt" data-address="0x53b79eCBacC00e14ec6761dE870e045342756b5c" data-network="ERC-20 / BEP-20">USDT (ERC-20 / BEP-20)</option>
+   <option value="btc" data-address="bc1qc998u32ll78fdgka20lppcpsgwal5pccfpmcmp" data-network="Bitcoin">Bitcoin (BTC)</option>
+   <option value="trx" data-address="TMUqXnFjirnmahpndsDJuPjGgpndgufiRP" data-network="TRON">TRON (TRX)</option>
+   <option value="sol" data-address="2VN1hVHdYoUFGf2wrMypgrSZofzEgPJX7cJQBe98zKiE" data-network="Solana">Solana (SOL)</option>
+  </select>
+ </div>
+
+ <!-- QR Code -->
+ <div class="qr-container" id="bepQrContainer">
+  <div class="qr-placeholder"><i class="fas fa-qrcode" style="font-size: 2rem; display: block; margin-bottom: 8px;"></i> Select currency</div>
+ </div>
+
+ <p style="margin-bottom: 10px; color: #94a3b8;">Send exactly <strong id="bepPayAmount" style="color:#e2e8f0;">- USDT</strong> to:</p>
  <div class="address-copy">
- <span style="font-family: monospace; color: #e2e8f0;">0x53b79eCBacC00e14ec6761dE870e045342756b5c</span>
+ <span id="bepPaymentAddress" style="font-family: monospace; color: #e2e8f0;">0x53b79eCBacC00e14ec6761dE870e045342756b5c</span>
  <button class="copy-btn" id="bepCopyAddressBtn" title="Copy address" aria-label="Copy address"><i class="far fa-copy" aria-hidden="true"></i></button>
  </div>
  <div class="security-badge" style="margin-top: 8px;">
- <i class="fas fa-shield-alt" aria-hidden="true"></i> Only send USDT on BEP-20 network
+ <i class="fas fa-shield-alt" aria-hidden="true"></i> <span id="bepNetworkNote">Only send USDT on BEP-20 network</span>
  </div>
  </div>
  
  <label style="font-weight:600; display:block; margin-bottom: 8px; color: #e2e8f0;"><i class="fas fa-hashtag" aria-hidden="true"></i> Transaction Hash (TxID)</label>
- <input type="text" id="bepPaymentHash" class="hash-input" placeholder="Paste your BSC transaction hash (0x...)">
+ <input type="text" id="bepPaymentHash" class="hash-input" placeholder="Paste your transaction hash">
  
  <div class="action-buttons">
  <button class="btn btn-primary btn-large" id="bepCompleteBtn" style="background:linear-gradient(135deg,#F0B90B,#B38F00); color: #0f172a;"><i class="fas fa-check-circle" aria-hidden="true"></i> Complete Purchase</button>
@@ -914,18 +1021,35 @@
  <i class="fas fa-hand-holding-usd" style="font-size: 1.6rem; color: #f87171;" aria-hidden="true"></i>
  <span style="font-weight: 700; font-size: 1.2rem;">Payment details</span>
  </div>
- <p style="margin-bottom: 10px; color: #94a3b8;">Send exactly <strong id="trcPayAmount" style="color:#e2e8f0;">- USDT</strong> (USDT TRC-20) to:</p>
+
+ <!-- ===== CURRENCY DROPDOWN ===== -->
+ <div class="currency-selector-wrapper">
+  <div class="currency-label"><i class="fas fa-coins" aria-hidden="true"></i> Pay with:</div>
+  <select id="trcPaymentCurrency" class="currency-select" aria-label="Select payment currency">
+   <option value="usdt" data-address="0x53b79eCBacC00e14ec6761dE870e045342756b5c" data-network="ERC-20 / BEP-20">USDT (ERC-20 / BEP-20)</option>
+   <option value="btc" data-address="bc1qc998u32ll78fdgka20lppcpsgwal5pccfpmcmp" data-network="Bitcoin">Bitcoin (BTC)</option>
+   <option value="trx" data-address="TMUqXnFjirnmahpndsDJuPjGgpndgufiRP" data-network="TRON">TRON (TRX)</option>
+   <option value="sol" data-address="2VN1hVHdYoUFGf2wrMypgrSZofzEgPJX7cJQBe98zKiE" data-network="Solana">Solana (SOL)</option>
+  </select>
+ </div>
+
+ <!-- QR Code -->
+ <div class="qr-container" id="trcQrContainer">
+  <div class="qr-placeholder"><i class="fas fa-qrcode" style="font-size: 2rem; display: block; margin-bottom: 8px;"></i> Select currency</div>
+ </div>
+
+ <p style="margin-bottom: 10px; color: #94a3b8;">Send exactly <strong id="trcPayAmount" style="color:#e2e8f0;">- USDT</strong> to:</p>
  <div class="address-copy">
- <span style="font-family: monospace; color: #e2e8f0;">TKngt6Xr7eYpzrhpJkG1ZNMKXobYo5S8at</span>
+ <span id="trcPaymentAddress" style="font-family: monospace; color: #e2e8f0;">TKngt6Xr7eYpzrhpJkG1ZNMKXobYo5S8at</span>
  <button class="copy-btn" id="trcCopyAddressBtn" title="Copy address" aria-label="Copy address"><i class="far fa-copy" aria-hidden="true"></i></button>
  </div>
  <div class="security-badge" style="margin-top: 8px;">
- <i class="fas fa-shield-alt" aria-hidden="true"></i> Only send USDT on TRC-20 network
+ <i class="fas fa-shield-alt" aria-hidden="true"></i> <span id="trcNetworkNote">Only send USDT on TRC-20 network</span>
  </div>
  </div>
  
  <label style="font-weight:600; display:block; margin-bottom: 8px; color: #e2e8f0;"><i class="fas fa-hashtag" aria-hidden="true"></i> Transaction Hash (TxID)</label>
- <input type="text" id="trcPaymentHash" class="hash-input" placeholder="Paste your Tron transaction hash">
+ <input type="text" id="trcPaymentHash" class="hash-input" placeholder="Paste your transaction hash">
  
  <div class="action-buttons">
  <button class="btn btn-primary btn-large" id="trcCompleteBtn" style="background:linear-gradient(135deg,#ef4444,#dc2626); color:white;"><i class="fas fa-check-circle" aria-hidden="true"></i> Complete Purchase</button>
@@ -1105,6 +1229,63 @@ function updateBEP() {
 document.getElementById('bepSlider').addEventListener('input', updateBEP);
 updateBEP();
 
+// ===================== CURRENCY SELECTOR & QR HANDLERS =====================
+
+// QR code generation using quickchart.io (no library needed)
+function getQRCodeURL(text) {
+ return 'https://quickchart.io/qr?text=' + encodeURIComponent(text) + '&size=140&margin=1';
+}
+
+function setupCurrencySelector(prefix) {
+ const select = document.getElementById(prefix + 'PaymentCurrency');
+ const addressSpan = document.getElementById(prefix + 'PaymentAddress');
+ const qrContainer = document.getElementById(prefix + 'QrContainer');
+ const networkNote = document.getElementById(prefix + 'NetworkNote');
+ const copyBtn = document.getElementById(prefix + 'CopyAddressBtn');
+
+ if (!select || !addressSpan || !qrContainer) return;
+
+ // Initial update
+ function updateCurrency() {
+  const selected = select.options[select.selectedIndex];
+  const address = selected.dataset.address;
+  const network = selected.dataset.network;
+  
+  // Update address display
+  addressSpan.textContent = address;
+  
+  // Update network note
+  if (networkNote) {
+   networkNote.textContent = 'Only send ' + (selected.value === 'usdt' ? 'USDT on ' + network + ' network' : network + ' (' + selected.textContent.split(' ')[0] + ') to this address');
+  }
+  
+  // Update QR code
+  qrContainer.innerHTML = '<img src="' + getQRCodeURL(address) + '" alt="QR Code for ' + address + '" loading="lazy">';
+  
+  // Update copy button
+  if (copyBtn) {
+   copyBtn.onclick = function(e) {
+    e.preventDefault();
+    navigator.clipboard.writeText(address).then(() => {
+     showNotification('Address copied!');
+    }).catch(() => {
+     showNotification('Failed to copy address', true);
+    });
+   };
+  }
+ }
+
+ select.addEventListener('change', updateCurrency);
+ 
+ // Set initial state
+ updateCurrency();
+}
+
+// Initialize for all three pages
+setupCurrencySelector('erc');
+setupCurrencySelector('bep');
+setupCurrencySelector('trc');
+
 // ===================== ERC-20 PURCHASE FLOW =====================
 document.getElementById('ercConnectBtn').addEventListener('click', () => {
  const wallet = document.getElementById('ercWallet').value.trim();
@@ -1142,6 +1323,9 @@ document.getElementById('ercConnectBtn').addEventListener('click', () => {
  </div>
  </div>`;
  document.getElementById('ercPayAmount').textContent = price + ' USDT';
+ // Reset currency dropdown to USDT (first option)
+ const ercSelect = document.getElementById('ercPaymentCurrency');
+ if (ercSelect) { ercSelect.selectedIndex = 0; ercSelect.dispatchEvent(new Event('change')); }
  document.getElementById('ercTransactionPage').style.display = 'block';
  document.getElementById('ercHomeDiv').style.display = 'none';
  document.getElementById('ercTransactionPage').scrollIntoView({ behavior: 'smooth' });
@@ -1150,12 +1334,6 @@ document.getElementById('ercConnectBtn').addEventListener('click', () => {
 document.getElementById('ercBackHomeBtn').addEventListener('click', () => {
  document.getElementById('ercTransactionPage').style.display = 'none';
  document.getElementById('ercHomeDiv').style.display = 'block';
-});
-
-document.getElementById('ercCopyAddressBtn').addEventListener('click', () => {
- navigator.clipboard.writeText('0x53b79eCBacC00e14ec6761dE870e045342756b5c').then(() => {
- showNotification('Address copied!');
- });
 });
 
 document.getElementById('ercCompleteBtn').addEventListener('click', () => {
@@ -1224,6 +1402,9 @@ document.getElementById('bepConnectBtn').addEventListener('click', () => {
  </div>
  </div>`;
  document.getElementById('bepPayAmount').textContent = price + ' USDT';
+ // Reset currency dropdown to USDT
+ const bepSelect = document.getElementById('bepPaymentCurrency');
+ if (bepSelect) { bepSelect.selectedIndex = 0; bepSelect.dispatchEvent(new Event('change')); }
  document.getElementById('bepTransactionPage').style.display = 'block';
  document.getElementById('bepHomeDiv').style.display = 'none';
  document.getElementById('bepTransactionPage').scrollIntoView({ behavior: 'smooth' });
@@ -1232,12 +1413,6 @@ document.getElementById('bepConnectBtn').addEventListener('click', () => {
 document.getElementById('bepBackHomeBtn').addEventListener('click', () => {
  document.getElementById('bepTransactionPage').style.display = 'none';
  document.getElementById('bepHomeDiv').style.display = 'block';
-});
-
-document.getElementById('bepCopyAddressBtn').addEventListener('click', () => {
- navigator.clipboard.writeText('0x53b79eCBacC00e14ec6761dE870e045342756b5c').then(() => {
- showNotification('Address copied!');
- });
 });
 
 document.getElementById('bepCompleteBtn').addEventListener('click', () => {
@@ -1312,6 +1487,9 @@ document.getElementById('trcConnectBtn').addEventListener('click', () => {
  </div>
  </div>`;
  document.getElementById('trcPayAmount').textContent = trcSelectedPrice + ' USDT';
+ // Reset currency dropdown to USDT
+ const trcSelect = document.getElementById('trcPaymentCurrency');
+ if (trcSelect) { trcSelect.selectedIndex = 0; trcSelect.dispatchEvent(new Event('change')); }
  document.getElementById('trcTransactionPage').style.display = 'block';
  document.getElementById('trcHomeDiv').style.display = 'none';
  document.getElementById('trcTransactionPage').scrollIntoView({ behavior: 'smooth' });
@@ -1320,12 +1498,6 @@ document.getElementById('trcConnectBtn').addEventListener('click', () => {
 document.getElementById('trcBackHomeBtn').addEventListener('click', () => {
  document.getElementById('trcTransactionPage').style.display = 'none';
  document.getElementById('trcHomeDiv').style.display = 'block';
-});
-
-document.getElementById('trcCopyAddressBtn').addEventListener('click', () => {
- navigator.clipboard.writeText('TKngt6Xr7eYpzrhpJkG1ZNMKXobYo5S8at').then(() => {
- showNotification('Address copied!');
- });
 });
 
 document.getElementById('trcCompleteBtn').addEventListener('click', () => {
